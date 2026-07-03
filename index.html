@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abnahmeprotokoll · D&A Holding GmbH</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.page{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+.header-card{background:linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%);border-radius:14px;padding:0;margin-bottom:14px;overflow:hidden}
+.header-brand{display:flex;align-items:center;gap:14px;padding:20px 22px 14px}
+.logo-box{width:44px;height:44px;background:rgba(196,158,76,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-title{font-size:20px;font-weight:700;color:#fff;letter-spacing:0.5px;line-height:1.2}
+.header-title span{display:block;font-size:10px;font-weight:400;color:#C49E4C;letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.header-fields{padding:0 22px 20px}
+.header-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.doc-label{font-size:12px;color:rgba(255,255,255,0.45)}
+.date-chip{font-size:12px;color:#C49E4C;background:rgba(196,158,76,0.12);border:0.5px solid rgba(196,158,76,0.3);border-radius:6px;padding:4px 10px}
+.fields-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:600px){.fields-row{grid-template-columns:1fr}}
+.field-group label{font-size:10px;color:rgba(255,255,255,0.45);font-weight:500;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px}
+.field-group input,.field-group select{width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:13px;background:rgba(255,255,255,0.07);color:#fff;font-family:inherit}
+.field-group input:focus,.field-group select:focus{outline:none;border-color:#C49E4C}
+.field-group select option{background:#2a2a2a;color:#fff}
+.field-group input::placeholder{color:rgba(255,255,255,0.3)}
+.prog-wrap{margin-bottom:12px}
+.prog-bar{height:5px;background:#e8e8e4;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#C49E4C;border-radius:3px;transition:width 0.3s}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:4px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:500px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat{background:#fff;border:0.5px solid #e0e0dc;border-radius:10px;padding:10px;text-align:center}
+.stat-val{font-size:20px;font-weight:600;color:#1a1a1a}
+.stat-val.ok{color:#2d7a2d}
+.stat-val.no{color:#b33030}
+.stat-lbl{font-size:11px;color:#888;margin-top:2px}
+.section{background:#fff;border:0.5px solid #e0e0dc;border-radius:12px;margin-bottom:8px;overflow:hidden}
+.sec-head{background:#1a1a1a;color:#C49E4C;padding:10px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;letter-spacing:0.3px}
+.sec-num{width:20px;height:20px;border:1px solid rgba(196,158,76,0.4);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.item-row{display:flex;align-items:flex-start;border-bottom:0.5px solid #f0f0ec}
+.item-row:last-child{border-bottom:none}
+.item-main{flex:1;padding:9px 12px;line-height:1.5}
+.item-uk{font-size:13px;color:#1a1a1a;font-weight:500}
+.item-de{font-size:11px;color:#bbb;margin-top:1px}
+.btn-group{display:flex;align-items:center;padding:7px 8px;gap:5px;flex-shrink:0}
+.btn-ok{background:#edf7ed;color:#2d7a2d;border:1px solid #a3d4a3;border-radius:6px;font-size:12px;font-weight:600;padding:5px 10px;cursor:pointer}
+.btn-ok.active{background:#2d7a2d;color:#fff;border-color:#2d7a2d}
+.btn-no{background:#fdf0f0;color:#b33030;border:1px solid #e8a8a8;border-radius:6px;font-size:12px;font-weight:600;padding:5px 10px;cursor:pointer}
+.btn-no.active{background:#b33030;color:#fff;border-color:#b33030}
+.note-row{padding:4px 12px 10px;background:#fafaf8}
+.note-row textarea{width:100%;font-size:12px;border:1px solid #e0e0dc;border-radius:6px;padding:6px 8px;resize:none;background:#fff;color:#1a1a1a;font-family:inherit}
+.card{background:#fff;border:0.5px solid #e0e0dc;border-radius:12px;padding:18px 20px;margin-bottom:10px}
+.card-title{font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:12px}
+textarea.comment-box{width:100%;font-size:13px;border:1px solid #e0e0dc;border-radius:8px;padding:10px 12px;resize:vertical;min-height:80px;background:#fafaf8;color:#1a1a1a;font-family:inherit;line-height:1.6}
+.declaration{font-size:12px;color:#666;line-height:1.7;background:#fafaf8;border-radius:8px;padding:12px 14px;border-left:3px solid #C49E4C;margin-bottom:14px}
+.declaration strong{color:#1a1a1a}
+.sig-wrap{border:2px solid #e0e0dc;border-radius:10px;background:#fff;position:relative;height:130px;overflow:hidden;touch-action:none;cursor:crosshair}
+canvas#sigCanvas{position:absolute;top:0;left:0;width:100%;height:100%}
+.sig-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#ccc;pointer-events:none;text-align:center;line-height:1.8}
+.sig-actions{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.sig-clear{font-size:12px;color:#aaa;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;padding:4px 0}
+.sig-date{font-size:11px;color:#aaa}
+.submit-btn{width:100%;padding:16px;background:#C49E4C;color:#fff;font-size:15px;font-weight:600;border:none;border-radius:12px;cursor:pointer;font-family:inherit;margin-top:10px;min-height:54px}
+.submit-btn:active{opacity:0.85}
+@media(max-width:600px){
+  .sig-wrap{height:160px}
+  .submit-btn{padding:18px;font-size:16px;min-height:62px}
+  .btn-ok,.btn-no{padding:6px 12px;font-size:13px}
+  .item-uk{font-size:14px}
+}
+
+/* PRINT */
+#printPage{display:none}
+@media print{
+  body{background:#fff}
+  .page{display:none}
+  #printPage{display:block;font-family:-apple-system,sans-serif;font-size:12px;color:#000;padding:20px}
+  .pr-header{background:#1a1a1a;color:#fff;padding:14px 16px;margin:-20px -20px 16px;display:flex;justify-content:space-between;align-items:center}
+  .pr-logo{font-size:15px;font-weight:700}
+  .pr-sub{font-size:10px;color:#C49E4C;letter-spacing:1px;margin-top:2px}
+  .pr-meta{font-size:11px;color:#C49E4C;text-align:right}
+  .pr-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;background:#f9f9f9;padding:10px;border-radius:6px}
+  .pr-info-item label{font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:2px}
+  .pr-info-item span{font-size:12px;font-weight:600}
+  .pr-stats{display:flex;gap:14px;margin-bottom:14px;padding:8px 10px;background:#f9f9f9;border-radius:6px}
+  .pr-stat-val{font-size:15px;font-weight:700}
+  .pr-stat-lbl{font-size:9px;color:#999}
+  .pr-section{margin-bottom:12px;break-inside:avoid}
+  .pr-sec-head{background:#1a1a1a;color:#C49E4C;padding:5px 10px;font-size:11px;font-weight:700;border-radius:3px 3px 0 0}
+  .pr-item{display:flex;align-items:flex-start;padding:5px 8px;border-bottom:0.5px solid #eee;font-size:11px}
+  .pr-item:last-child{border-bottom:none}
+  .pr-item-text{flex:1}
+  .pr-item-uk{font-weight:500}
+  .pr-item-de{font-size:10px;color:#999}
+  .pr-status{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-left:8px}
+  .pr-status.ok{background:#edf7ed;color:#2d7a2d}
+  .pr-status.no{background:#fdf0f0;color:#b33030}
+  .pr-status.empty{background:#f5f5f5;color:#aaa}
+  .pr-note{font-size:10px;color:#b33030;padding:2px 8px 5px;background:#fff8f8;border-left:2px solid #b33030;margin:0 8px 4px}
+  .pr-comment{background:#fffbea;border:1px solid #C49E4C;border-radius:4px;padding:8px 10px;margin-bottom:12px;font-size:11px}
+  .pr-media{background:#f9f9f9;border-radius:4px;padding:8px 10px;margin-bottom:12px;font-size:11px}
+  .pr-declaration{font-size:10px;color:#666;line-height:1.6;border-left:3px solid #C49E4C;padding:8px 10px;margin-bottom:12px;background:#fafafa}
+  .pr-sig-img{border:1px solid #eee;border-radius:4px;max-height:70px;margin-top:6px;display:block}
+  .pr-sig-name{font-size:11px;font-weight:600;margin-top:4px}
+  .pr-sig-date{font-size:10px;color:#999}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header-card">
+    <div class="header-brand">
+      <div class="logo-box">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="3" y="8" width="5" height="16" rx="0.5" stroke="#C49E4C" stroke-width="1.2"/>
+          <rect x="10" y="12" width="5" height="12" rx="0.5" stroke="#C49E4C" stroke-width="1.2"/>
+          <rect x="17" y="15" width="5" height="9" rx="0.5" stroke="#C49E4C" stroke-width="1.2"/>
+          <polyline points="3,8 5.5,4 8,8" fill="none" stroke="#C49E4C" stroke-width="1.2" stroke-linejoin="round"/>
+          <polyline points="10,12 12.5,8 15,12" fill="none" stroke="#C49E4C" stroke-width="1.2" stroke-linejoin="round"/>
+          <rect x="4.5" y="11" width="2" height="2" rx="0.3" fill="#C49E4C" opacity="0.7"/>
+          <rect x="4.5" y="15" width="2" height="2" rx="0.3" fill="#C49E4C" opacity="0.7"/>
+          <rect x="11.5" y="14" width="2" height="2" rx="0.3" fill="#C49E4C" opacity="0.7"/>
+          <line x1="1" y1="24" x2="25" y2="24" stroke="#C49E4C" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header-title">D&amp;A HOLDING<span>ALLES AUS EINER HAND</span></div>
+      </div>
+    </div>
+    <div class="header-fields">
+      <div class="header-meta">
+        <span class="doc-label">Акт приймання · Abnahmeprotokoll</span>
+        <span class="date-chip" id="dateChip"></span>
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <label>Співробітник / Mitarbeiter</label>
+          <select id="workerName" onchange="onWorkerChange()">
+            <option value="">— обрати —</option>
+          </select>
+          <input type="text" id="workerCustom" placeholder="Введіть ім'я..." style="display:none;margin-top:6px">
+        </div>
+        <div class="field-group">
+          <label>Об'єкт / Baustelle</label>
+          <select id="baustelle" onchange="onSiteChange()">
+            <option value="">— обрати —</option>
+          </select>
+          <input type="text" id="siteCustom" placeholder="Введіть адресу..." style="display:none;margin-top:6px">
+        </div>
+        <div class="field-group">
+          <label>Квартира / Wohnungsnr.</label>
+          <input type="text" id="wohnungNr" placeholder="напр. 12">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-label"><span id="progText">0 / 0 перевірено</span><span id="progPct">0%</span></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">всього</div></div>
+    <div class="stat"><div class="stat-val ok" id="stOk">0</div><div class="stat-lbl">✓ OK</div></div>
+    <div class="stat"><div class="stat-val no" id="stNo">0</div><div class="stat-lbl">✗ зауважень</div></div>
+    <div class="stat"><div class="stat-val" id="stPend">0</div><div class="stat-lbl">не перевірено</div></div>
+  </div>
+
+  <div id="cl"></div>
+
+  <div class="card">
+    <div class="card-title">💬 Загальні коментарі / Allgemeine Bemerkungen</div>
+    <textarea class="comment-box" id="generalComment" placeholder="Додаткові зауваження після огляду..."></textarea>
+  </div>
+
+  <div class="card" style="border-left:3px solid #C49E4C">
+    <div class="card-title">📸 Фото та відео / Fotos &amp; Video <span style="color:#b33030;font-size:12px;font-weight:400">* обов'язково</span></div>
+    <div style="font-size:13px;color:#1a1a1a;line-height:1.9;margin-bottom:12px">
+      📷 Фото кожного приміщення<br>
+      🎥 Відео — обхід всієї квартири<br><br>
+      <strong>Відправте у чат приймання:</strong><br>
+      <span style="color:#555">1. PDF-звіт &nbsp;→&nbsp; 2. Відео</span>
+    </div>
+    <div style="font-size:11px;color:#aaa;margin-bottom:14px">Protokolle ohne Fotos &amp; Video werden nicht akzeptiert.</div>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px;background:#fafaf8;border-radius:8px;border:1px solid #e0e0dc" id="mediaLabel">
+      <input type="checkbox" id="mediaConfirm" style="margin-top:2px;width:16px;height:16px;accent-color:#2d7a2d;flex-shrink:0">
+      <span style="font-size:13px;color:#1a1a1a;line-height:1.5">
+        Я підтверджую, що фото та відео зроблені і будуть відправлені в чат.<br>
+        <span style="font-size:11px;color:#aaa">Ich bestätige, dass Fotos und Video aufgenommen wurden.</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="card">
+    <div class="declaration">
+      <strong>Підтвердження:</strong> Я особисто оглянув(ла) об'єкт та підтверджую, що зазначені дані відповідають дійсності.<br>
+      <span style="color:#aaa;font-size:11px">Ich bestätige, dass ich das Objekt persönlich besichtigt habe und alle Angaben der Wahrheit entsprechen.</span>
+    </div>
+    <div class="card-title" style="margin-bottom:8px">✍️ Підпис / Unterschrift</div>
+    <div class="sig-wrap" id="sigWrap">
+      <canvas id="sigCanvas"></canvas>
+      <div class="sig-hint" id="sigHint">✍️<br>Підпишіть тут пальцем<br><span style="font-size:10px">Hier mit Finger unterschreiben</span></div>
+    </div>
+    <div class="sig-actions">
+      <button class="sig-clear" onclick="clearSig()">Очистити / Löschen</button>
+      <span class="sig-date" id="sigDateLabel"></span>
+    </div>
+    <button class="submit-btn" onclick="handleSubmit('download')" style="margin-top:10px">⬇ Завантажити PDF</button>
+    <button class="submit-btn" onclick="handleSubmit('print')" style="margin-top:8px;background:#555;color:#fff">🖨 Роздрукувати</button>
+  </div>
+
+</div>
+<div id="printPage"></div>
+
+<script>
+// ============================================================
+// КОНФІГУРАЦІЯ — редагуйте тут імена та адреси
+// ============================================================
+var WORKERS = [
+  "Boichuk Mykhailo III",
+  "Franz Harald",
+  "Moisyshyn Andrii",
+  "Pankiv Mykhailo",
+  "Priadka Mykhailo I",
+  "Sabetskyi Mykhailo",
+  "Sorian Robin Georghe",
+  "Spetruk Vasyl",
+  "Spetruk Volodymyr",
+  "Zamrii Yaroslav",
+  "Dnes Zoreslav",
+  "Havrysh Bohdan",
+  "Protas Ivan",
+  "Zamrii Ivan",
+  "Vintoniak Vasyl",
+  "Taras Savchyk"
+];
+var SITES = [
+  "Voltastraße 92",
+  "Peter-Henlein-Straße 81",
+  "Martin-Albert-Straße 12",
+  "Else-Straße 22",
+  "Endterstraße 60"
+];
+// ============================================================
+
+var SECTIONS = [
+  {num:"01",title:"Загальне / Allgemein",items:[
+    {uk:"Вхідні двері — функція, ущільнювач, замок",de:"Eingangstür — Funktion, Dichtung, Schloss"},
+    {uk:"Вікна — відкривання, ущільнювач, ручки",de:"Fenster — Öffnung, Dichtung, Griffe"},
+    {uk:"Стіни — рівність, відсутність тріщин",de:"Wände — Ebenheit, keine Risse"},
+    {uk:"Стелі — без тріщин, рівна штукатурка",de:"Decken — keine Risse, sauber verputzt"},
+    {uk:"Підлоги — загальний вигляд і стан",de:"Böden — allgemeiner Zustand"}
+  ]},
+  {num:"02",title:"Стіни та стелі / Wände & Decken",items:[
+    {uk:"Штукатурка суцільна, без порожнин",de:"Putz vollflächig, keine Hohlstellen"},
+    {uk:"Примикання до вікон і дверей акуратні",de:"Anschlüsse an Fenster/Türen sauber"},
+    {uk:"Кути та кромки рівні",de:"Ecken und Kanten gerade"},
+    {uk:"Фарбування рівномірне, без плям",de:"Farbe gleichmäßig, keine Flecken"},
+    {uk:"Плінтуси щільно прилягають",de:"Sockelleisten fest und dicht"}
+  ]},
+  {num:"03",title:"Підлоги / Böden",items:[
+    {uk:"Плитка / покриття — без тріщин та сколів",de:"Fliesen/Belag — keine Risse oder Absplitterungen"},
+    {uk:"Шви рівномірні, повністю заповнені",de:"Fugen gleichmäßig, vollständig verfugt"},
+    {uk:"Переходи та пороги змонтовані правильно",de:"Übergänge und Schwellen korrekt montiert"},
+    {uk:"Покриття міцно приклеєне, без порожнин",de:"Belag fest verklebt, keine Hohlstellen"},
+    {uk:"Плінтуси встановлені без зазорів",de:"Sockelleisten lückenlos gesetzt"}
+  ]},
+  {num:"04",title:"Електрика / Elektro",items:[
+    {uk:"Розподільний щит підписаний, всі автомати на місці",de:"Sicherungskasten beschriftet, alle Sicherungen vorhanden"},
+    {uk:"Всі розетки працюють",de:"Alle Steckdosen funktionsfähig"},
+    {uk:"Всі вимикачі працюють",de:"Alle Lichtschalter funktionsfähig"},
+    {uk:"Світильники змонтовані та працюють",de:"Leuchten montiert und in Betrieb"},
+    {uk:"Домофон / дзвінок працює",de:"Gegensprechanlage / Klingel funktionsfähig"},
+    {uk:"Інтернет / ТВ-розетки встановлені",de:"Internet-/TV-Anschlüsse vorhanden"}
+  ]},
+  {num:"05",title:"Сантехніка та опалення / Sanitär & Heizung",items:[
+    {uk:"Трубопроводи — видимих витоків немає",de:"Rohrleitungen — keine sichtbaren Leckagen"},
+    {uk:"Радіатори — всі змонтовані та гріють",de:"Heizkörper — alle montiert und warm"},
+    {uk:"Термостатні клапани працюють",de:"Thermostatventile funktionsfähig"},
+    {uk:"Гаряча вода є",de:"Warmwasser verfügbar"},
+    {uk:"Холодна вода є",de:"Kaltwasser funktionsfähig"}
+  ]},
+  {num:"06",title:"Ванна / туалет / Bad & WC",items:[
+    {uk:"Настінна плитка — без тріщин, шви рівномірні",de:"Wandfliesen — keine Risse, gleichmäßige Fugen"},
+    {uk:"Підлогова плитка — без порожнин",de:"Bodenfliesen — keine Hohlstellen"},
+    {uk:"Ванна / піддон — силікон нанесено повністю",de:"Wanne / Duschwanne — Silikonfugen vollständig"},
+    {uk:"Душова кабіна / двері не протікає",de:"Duschkabine / Tür dicht"},
+    {uk:"Унітаз змонтований міцно, не хитається",de:"WC fest montiert, kein Wackeln"},
+    {uk:"Раковина та змішувач — без витоку",de:"Waschbecken und Armatur dicht"},
+    {uk:"Дзеркало / аксесуари змонтовані",de:"Spiegel / Zubehör montiert"},
+    {uk:"Вентиляція працює",de:"Lüftung funktionsfähig"}
+  ]},
+  {num:"07",title:"Кухня / Küche",items:[
+    {uk:"Підлогове покриття без дефектів",de:"Bodenfliesen / Belag ohne Mängel"},
+    {uk:"Настінна плитка / фартух змонтовані правильно",de:"Wandfliesen / Spritzschutz korrekt"},
+    {uk:"Мийка та змішувач — без витоку",de:"Spüle und Armatur dicht"},
+    {uk:"Підключення для посудомийної машини є",de:"Anschluss für Spülmaschine vorhanden"},
+    {uk:"Підключення для плити / варильної панелі коректне",de:"Herd-/Kochfeldanschluss korrekt"},
+    {uk:"Витяжка працює",de:"Dunstabzug funktionsfähig"}
+  ]},
+  {num:"08",title:"Двері та вікна / Türen & Fenster",items:[
+    {uk:"Міжкімнатні двері — функція, ручки, замки",de:"Innentüren — Funktion, Griffe, Schlösser"},
+    {uk:"Дверні полотна без пошкоджень",de:"Türblätter ohne Beschädigungen"},
+    {uk:"Дверні коробки змонтовані акуратно",de:"Zargen sauber montiert, keine Spalten"},
+    {uk:"Підвіконня встановлені всередині",de:"Fensterbänke innen montiert"}
+  ]}
+];
+
+var state = {};
+var sigDrawing = false, sigCtx = null, sigHasMark = false;
+var NOW = new Date();
+var DATE_STR = NOW.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('dateChip').textContent = DATE_STR;
+  document.getElementById('sigDateLabel').textContent = DATE_STR;
+
+  // Fill workers
+  var wSel = document.getElementById('workerName');
+  WORKERS.forEach(function(w) {
+    var o = document.createElement('option');
+    o.value = w; o.textContent = w; wSel.appendChild(o);
+  });
+  var wo = document.createElement('option');
+  wo.value = '__other__'; wo.textContent = '+ Додати ім\'я'; wSel.appendChild(wo);
+
+  // Fill sites
+  var sSel = document.getElementById('baustelle');
+  SITES.forEach(function(s) {
+    var o = document.createElement('option');
+    o.value = s; o.textContent = s; sSel.appendChild(o);
+  });
+  var so = document.createElement('option');
+  so.value = '__other__'; so.textContent = '+ Додати адресу'; sSel.appendChild(so);
+
+  // Total
+  var total = 0;
+  SECTIONS.forEach(function(s){ total += s.items.length; });
+  document.getElementById('stTotal').textContent = total;
+  document.getElementById('stPend').textContent = total;
+
+  buildChecklist();
+  initSig();
+});
+
+function onWorkerChange() {
+  var sel = document.getElementById('workerName');
+  var inp = document.getElementById('workerCustom');
+  inp.style.display = sel.value === '__other__' ? 'block' : 'none';
+  if(sel.value === '__other__') inp.focus();
+}
+
+function onSiteChange() {
+  var sel = document.getElementById('baustelle');
+  var inp = document.getElementById('siteCustom');
+  inp.style.display = sel.value === '__other__' ? 'block' : 'none';
+  if(sel.value === '__other__') inp.focus();
+}
+
+function getWorker() {
+  var sel = document.getElementById('workerName');
+  return sel.value === '__other__' ? document.getElementById('workerCustom').value.trim() : sel.value;
+}
+
+function getSite() {
+  var sel = document.getElementById('baustelle');
+  return sel.value === '__other__' ? document.getElementById('siteCustom').value.trim() : sel.value;
+}
+
+function buildChecklist() {
+  var cl = document.getElementById('cl');
+  cl.innerHTML = '';
+  var total = 0, ok = 0, no = 0;
+  var S_OK_DEF = "border:1px solid #c0c0bc;border-radius:6px;font-size:12px;font-weight:600;padding:5px 11px;cursor:pointer;background:#f5f5f3;color:#666";
+  var S_OK_ACT = "border:1px solid #2d7a2d;border-radius:6px;font-size:12px;font-weight:600;padding:5px 11px;cursor:pointer;background:#2d7a2d;color:#fff";
+  var S_NO_DEF = "border:1px solid #c0c0bc;border-radius:6px;font-size:12px;font-weight:600;padding:5px 11px;cursor:pointer;background:#f5f5f3;color:#666";
+  var S_NO_ACT = "border:1px solid #b33030;border-radius:6px;font-size:12px;font-weight:600;padding:5px 11px;cursor:pointer;background:#b33030;color:#fff";
+  SECTIONS.forEach(function(sec, si) {
+    total += sec.items.length;
+    var div = document.createElement('div');
+    div.className = 'section';
+    var html = '<div class="sec-head"><span class="sec-num">'+sec.num+'</span>'+sec.title+'</div>';
+    sec.items.forEach(function(item, ii) {
+      var key = si+'-'+ii;
+      var v = state[key] || '';
+      if(v==='ok') ok++;
+      if(v==='no') no++;
+      html += '<div class="item-row"><div class="item-main"><div class="item-uk">'+item.uk+'</div><div class="item-de">'+item.de+'</div></div>';
+      html += '<div class="btn-group">';
+      html += '<button style="'+(v==='ok'?S_OK_ACT:S_OK_DEF)+'" onclick="setVal(\''+key+'\',\'ok\')">✓ OK</button>';
+      html += '<button style="'+(v==='no'?S_NO_ACT:S_NO_DEF)+'" onclick="setVal(\''+key+'\',\'no\')">✗ Зауваження</button>';
+      html += '</div></div>';
+      if(v==='no'){
+        html += '<div class="note-row"><textarea rows="2" placeholder="Опишіть зауваження..." oninput="state[\''+key+'-note\']=this.value">'+(state[key+'-note']||'')+'</textarea></div>';
+      }
+    });
+    div.innerHTML = html;
+    cl.appendChild(div);
+  });
+  var done = ok + no;
+  document.getElementById('stOk').textContent = ok;
+  document.getElementById('stNo').textContent = no;
+  document.getElementById('stPend').textContent = total - done;
+  document.getElementById('progText').textContent = done+' / '+total+' перевірено';
+  document.getElementById('progPct').textContent = Math.round(done/total*100)+'%';
+  document.getElementById('progFill').style.width = Math.round(done/total*100)+'%';
+}
+
+function setVal(key, val) {
+  state[key] = val;
+  buildChecklist();
+}
+
+function initSig() {
+  var canvas = document.getElementById('sigCanvas');
+  var wrap = document.getElementById('sigWrap');
+  canvas.width = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
+  sigCtx = canvas.getContext('2d');
+  sigCtx.strokeStyle = '#1a1a1a';
+  sigCtx.lineWidth = 2.5;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+  function pos(e){
+    var r=canvas.getBoundingClientRect();
+    var src=e.touches?e.touches[0]:e;
+    return{x:(src.clientX-r.left)*(canvas.width/r.width),y:(src.clientY-r.top)*(canvas.height/r.height)};
+  }
+  canvas.addEventListener('mousedown',function(e){sigDrawing=true;var p=pos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);document.getElementById('sigHint').style.display='none';sigHasMark=true;});
+  canvas.addEventListener('mousemove',function(e){if(!sigDrawing)return;var p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();});
+  canvas.addEventListener('mouseup',function(){sigDrawing=false;});
+  canvas.addEventListener('touchstart',function(e){e.preventDefault();sigDrawing=true;var p=pos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);document.getElementById('sigHint').style.display='none';sigHasMark=true;},{passive:false});
+  canvas.addEventListener('touchmove',function(e){e.preventDefault();if(!sigDrawing)return;var p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();},{passive:false});
+  canvas.addEventListener('touchend',function(){sigDrawing=false;});
+}
+
+function clearSig(){
+  if(sigCtx) sigCtx.clearRect(0,0,sigCtx.canvas.width,sigCtx.canvas.height);
+  document.getElementById('sigHint').style.display='';
+  sigHasMark=false;
+}
+
+function handleSubmit(mode){
+  var name=getWorker(), site=getSite(), apt=document.getElementById('wohnungNr').value.trim();
+  if(!name||!site||!apt){alert('Будь ласка, заповніть: ім\'я, об\'єкт та номер квартири.');return;}
+  if(!document.getElementById('mediaConfirm').checked){
+    alert('⚠️ Підтвердіть, що фото та відео зроблені.');
+    document.getElementById('mediaLabel').style.borderColor='#b33030';
+    document.getElementById('mediaLabel').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  var total=0,done=0;
+  SECTIONS.forEach(function(s){total+=s.items.length;});
+  for(var k in state){if(k.indexOf('-note')===-1&&(state[k]==='ok'||state[k]==='no'))done++;}
+  if(done<total){if(!confirm('Не всі пункти перевірені ('+done+'/'+total+'). Все одно продовжити?'))return;}
+  if(mode==='download'){
+    generatePDF(name,site,apt);
+  } else {
+    buildPrint(name,site,apt);
+    window.print();
+  }
+}
+
+function generatePDF(name,site,apt){
+  var ok=0,no=0,total=0;
+  SECTIONS.forEach(function(s){total+=s.items.length;});
+  for(var k in state){if(k.indexOf('-note')!==-1)continue;if(state[k]==='ok')ok++;if(state[k]==='no')no++;}
+  var done=ok+no;
+  var comment=document.getElementById('generalComment').value.trim();
+  var sigData=sigHasMark?document.getElementById('sigCanvas').toDataURL('image/png'):null;
+
+  var sectHtml='';
+  SECTIONS.forEach(function(sec,si){
+    var rows='';
+    sec.items.forEach(function(item,ii){
+      var k=si+'-'+ii,v=state[k]||'';
+      var badge=v==='ok'
+        ?'<span style="background:#edf7ed;color:#2d7a2d;border:1px solid #a3d4a3;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap">✓ OK</span>'
+        :v==='no'
+        ?'<span style="background:#fdf0f0;color:#b33030;border:1px solid #e8a8a8;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap">✗ Зауваження</span>'
+        :'<span style="color:#bbb;font-size:11px">—</span>';
+      var noteTr=v==='no'&&state[k+'-note']
+        ?'<tr><td colspan="2" style="padding:3px 10px 6px 16px;background:#fff8f8;border-left:3px solid #b33030;color:#b33030;font-size:10px;font-style:italic">↳ '+state[k+'-note']+'</td></tr>'
+        :'';
+      rows+='<tr style="border-bottom:0.5px solid #f0f0ec"><td style="padding:7px 10px;font-size:11px;color:#1a1a1a;font-weight:500">'+item.uk+'<br><span style="font-size:10px;color:#bbb">'+item.de+'</span></td><td style="padding:7px 10px;text-align:right;white-space:nowrap">'+badge+'</td></tr>'+noteTr;
+    });
+    sectHtml+='<div style="margin-bottom:12px;break-inside:avoid">'
+      +'<div style="background:#1a1a1a;color:#C49E4C;padding:6px 12px;font-size:11px;font-weight:700;border-radius:4px 4px 0 0">'+sec.num+' · '+sec.title+'</div>'
+      +'<table style="width:100%;border-collapse:collapse;background:#fff;border:0.5px solid #e0e0dc;border-top:none;border-radius:0 0 4px 4px">'+rows+'</table>'
+      +'</div>';
+  });
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<title>Abnahme_'+site.replace(/\s/g,'_')+'_W'+apt+'</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;color:#1a1a1a;padding:20px}@media print{body{padding:0}}</style>'
+    +'</head><body>'
+    +'<div style="background:#1a1a1a;color:#fff;padding:14px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;border-radius:6px">'
+    +'<div><div style="font-size:16px;font-weight:700;letter-spacing:0.5px">D&amp;A HOLDING GmbH</div><div style="font-size:10px;color:#C49E4C;letter-spacing:2px;margin-top:3px">ABNAHMEPROTOKOLL</div></div>'
+    +'<div style="font-size:12px;color:#C49E4C">'+DATE_STR+'</div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;background:#f9f9f9;padding:12px;border-radius:6px">'
+    +'<div><div style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px">Співробітник</div><div style="font-size:13px;font-weight:600">'+name+'</div></div>'
+    +'<div><div style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px">Об\'єкт</div><div style="font-size:13px;font-weight:600">'+site+'</div></div>'
+    +'<div><div style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px">Квартира</div><div style="font-size:13px;font-weight:600">'+apt+'</div></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:16px;margin-bottom:16px;background:#f9f9f9;padding:10px 14px;border-radius:6px">'
+    +'<div><span style="font-size:16px;font-weight:700">'+total+'</span><div style="font-size:9px;color:#999">всього</div></div>'
+    +'<div><span style="font-size:16px;font-weight:700;color:#2d7a2d">'+ok+'</span><div style="font-size:9px;color:#999">✓ OK</div></div>'
+    +'<div><span style="font-size:16px;font-weight:700;color:#b33030">'+no+'</span><div style="font-size:9px;color:#999">✗ зауважень</div></div>'
+    +'<div><span style="font-size:16px;font-weight:700">'+Math.round(done/total*100)+'%</span><div style="font-size:9px;color:#999">перевірено</div></div>'
+    +'</div>'
+    +sectHtml
+    +(comment?'<div style="background:#fffbea;border:1px solid #C49E4C;border-radius:4px;padding:10px 12px;margin-bottom:14px;font-size:11px"><strong>Коментарі:</strong> '+comment+'</div>':'')
+    +'<div style="background:#f9f9f9;border-radius:4px;padding:8px 12px;margin-bottom:14px;font-size:11px">✓ Фото та відео підтверджені — відправлені в чат приймання разом з цим звітом.</div>'
+    +'<div style="border-left:3px solid #C49E4C;padding:8px 12px;margin-bottom:16px;font-size:10px;color:#666;line-height:1.7">'
+    +'Я особисто оглянув(ла) об\'єкт та підтверджую, що зазначені дані відповідають дійсності.<br>'
+    +'Ich bestätige, dass ich das Objekt persönlich besichtigt habe und alle Angaben der Wahrheit entsprechen.</div>'
+    +(sigData?'<img src="'+sigData+'" style="height:60px;border:1px solid #eee;border-radius:4px;display:block;margin-bottom:6px">':'<div style="height:50px;width:180px;border:1px solid #eee;border-radius:4px;margin-bottom:6px"></div>')
+    +'<div style="font-size:12px;font-weight:600">'+name+'</div>'
+    +'<div style="font-size:11px;color:#999">'+DATE_STR+'</div>'
+    +'<script>window.onload=function(){window.print();}<\/script>'
+    +'</body></html>';
+
+  var w=window.open('','_blank');
+  if(!w){alert('Дозвольте спливаючі вікна для цього сайту і спробуйте ще раз.');return;}
+  w.document.write(html);
+  w.document.close();
+}
+function buildPrint(name,site,apt){
+  var ok=0,no=0,total=0;
+  SECTIONS.forEach(function(s){total+=s.items.length;});
+  for(var k in state){if(k.indexOf('-note')!==-1)continue;if(state[k]==='ok')ok++;if(state[k]==='no')no++;}
+  var sectHtml='';
+  SECTIONS.forEach(function(sec,si){
+    var items='';
+    sec.items.forEach(function(item,ii){
+      var key=si+'-'+ii, v=state[key]||'';
+      var lbl=v==='ok'?'✓ OK':v==='no'?'✗ Зауваження':'—';
+      var cls=v==='ok'?'ok':v==='no'?'no':'empty';
+      items+='<div class="pr-item"><div class="pr-item-text"><div class="pr-item-uk">'+item.uk+'</div><div class="pr-item-de">'+item.de+'</div></div><span class="pr-status '+cls+'">'+lbl+'</span></div>';
+      if(v==='no'&&state[key+'-note'])items+='<div class="pr-note">↳ '+state[key+'-note']+'</div>';
+    });
+    sectHtml+='<div class="pr-section"><div class="pr-sec-head">'+sec.num+' · '+sec.title+'</div>'+items+'</div>';
+  });
+  var comment=document.getElementById('generalComment').value.trim();
+  var sigData=sigHasMark?document.getElementById('sigCanvas').toDataURL():null;
+  document.getElementById('printPage').innerHTML=
+    '<div class="pr-header"><div><div class="pr-logo">D&amp;A HOLDING GmbH</div><div class="pr-sub">ABNAHMEPROTOKOLL</div></div><div class="pr-meta">'+DATE_STR+'</div></div>'+
+    '<div class="pr-info"><div class="pr-info-item"><label>Співробітник</label><span>'+name+'</span></div><div class="pr-info-item"><label>Об\'єкт</label><span>'+site+'</span></div><div class="pr-info-item"><label>Квартира</label><span>'+apt+'</span></div></div>'+
+    '<div class="pr-stats"><div class="pr-stat"><div class="pr-stat-val">'+total+'</div><div class="pr-stat-lbl">всього</div></div><div class="pr-stat"><div class="pr-stat-val" style="color:#2d7a2d">'+ok+'</div><div class="pr-stat-lbl">✓ OK</div></div><div class="pr-stat"><div class="pr-stat-val" style="color:#b33030">'+no+'</div><div class="pr-stat-lbl">✗ зауважень</div></div><div class="pr-stat"><div class="pr-stat-val">'+Math.round((ok+no)/total*100)+'%</div><div class="pr-stat-lbl">перевірено</div></div></div>'+
+    sectHtml+
+    (comment?'<div class="pr-comment"><strong>Коментарі:</strong> '+comment+'</div>':'')+
+    '<div class="pr-media">✓ Фото та відео відправлені в чат приймання разом з цим звітом.</div>'+
+    '<div class="pr-declaration">Я особисто оглянув(ла) об\'єкт та підтверджую, що зазначені дані відповідають дійсності.<br><span style="color:#aaa">Ich bestätige, dass ich das Objekt persönlich besichtigt habe und alle Angaben der Wahrheit entsprechen.</span></div>'+
+    '<div>'+(sigData?'<img class="pr-sig-img" src="'+sigData+'" alt="підпис">':'<div style="height:50px;border:1px solid #eee;width:200px;border-radius:4px;margin-top:6px"></div>')+'<div class="pr-sig-name">'+name+'</div><div class="pr-sig-date">'+DATE_STR+'</div></div>';
+}
+</script>
+</body>
+</html>
